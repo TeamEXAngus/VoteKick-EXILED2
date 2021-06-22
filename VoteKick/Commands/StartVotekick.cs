@@ -51,6 +51,12 @@ namespace Commands.VotekickCommand
                 return false;
             }
 
+            if (not(Votekick.Votekick.Instance.ActiveKickPoll is null))
+            {
+                response = "You cannot start a vote kick whilst one is currently active!";
+                return false;
+            }
+
             Player TargetPlayer = Player.Get((sender as CommandSender)?.SenderId);
 
             if (CannotBeVotekicked(TargetPlayer))
