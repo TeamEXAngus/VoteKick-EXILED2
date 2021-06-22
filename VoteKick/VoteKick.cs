@@ -37,11 +37,14 @@ namespace Votekick
         public int[] Votes;
         public List<Player> AlreadyVoted;
         public CoroutineHandle ActiveCoro;
-        private readonly ushort BroadcastTime = Votekick.Instance.Config.VotekickTextDuration;
-        private readonly int KickPollDuration = Votekick.Instance.Config.VotekickDuration;
+        private readonly ushort BroadcastTime;
+        private readonly int KickPollDuration;
 
         public KickPoll(string reason, Player target)
         {
+            BroadcastTime = Votekick.Instance.Config.VotekickTextDuration;
+            KickPollDuration = Votekick.Instance.Config.VotekickDuration;
+
             Reason = reason;
             Target = target;
             Votes = new int[2] { 0, 0 };
