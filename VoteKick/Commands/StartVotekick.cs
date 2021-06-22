@@ -51,7 +51,7 @@ namespace Commands.VotekickCommand
                 return false;
             }
 
-            Player TargetPlayer = Player.Get(arguments.At(1));
+            Player TargetPlayer = Player.Get((sender as CommandSender)?.SenderId);
 
             if (CannotBeVotekicked(TargetPlayer))
             {
