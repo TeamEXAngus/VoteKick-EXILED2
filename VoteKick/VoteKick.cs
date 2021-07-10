@@ -8,7 +8,8 @@ namespace Votekick
 {
     public class Votekick : Plugin<Config>
     {
-        public static Votekick Instance;
+        private static Votekick singleton = new Votekick();
+        public static Votekick Instance => singleton;
 
         public override PluginPriority Priority { get; } = PluginPriority.Medium;
 
@@ -17,12 +18,11 @@ namespace Votekick
 
         public KickPoll ActiveKickPoll = null;
 
-        public Votekick()
+        private Votekick()
         { }
 
         public override void OnEnabled()
         {
-            Instance = this;
         }
 
         public override void OnDisabled()

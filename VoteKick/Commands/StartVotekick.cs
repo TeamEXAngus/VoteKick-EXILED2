@@ -17,25 +17,25 @@ namespace Commands.VotekickCommand
 
         public string Description { get; } = "Used for starting votekicks or voting to kick players.";
 
-        public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
+        public bool Execute(ArraySegment<string> Arguments, ICommandSender sender, out string response)
         {
-            if (arguments.Count == 0) { response = "Incorrect usage! \"votekick start\" or \"votekick yes\" or \"votekick no\""; }
+            if (Arguments.Count == 0) { response = "Incorrect usage! \"votekick start\" or \"votekick yes\" or \"votekick no\""; return false; }
 
-            switch (arguments.At(0).ToLower())
+            switch (Arguments.At(0).ToLower())
             {
                 case "start":
-                    if (arguments.Count < 2)
+                    if (Arguments.Count < 2)
                     {
                         response = "Incorrect usage! \"votekick start <player> [reason]\"";
                         return false;
                     }
-                    return Start(arguments, sender, out response);
+                    return Start(Arguments, sender, out response);
 
                 case "yes":
                 case "no":
                 case "y":
                 case "n":
-                    return Vote(arguments, sender, out response);
+                    return Vote(Arguments, sender, out response);
 
                 default:
                     response = "Incorrect usage! Valid sub-commands are \"start\", \"yes\", \"no\"";
@@ -43,21 +43,21 @@ namespace Commands.VotekickCommand
             }
         }
 
-        public bool Start(ArraySegment<string> arguments, ICommandSender sender, out string response)
+        public bool Start(ArraySegment<string> Arguments, ICommandSender sender, out string response)
         {
-            if (not(CanStart(sender as CommandSender)))
+            if (!CanStart(sender as CommandSender))
             {
                 response = "You're not allowed to use this command!";
                 return false;
             }
 
-            if (not(Votekick.Votekick.Instance.ActiveKickPoll is null))
+            if (!(Votekick.Votekick.Instance.ActiveKickPoll is null))
             {
                 response = "You cannot start a vote kick whilst one is currently active!";
                 return false;
             }
 
-            Player TargetPlayer = Player.Get((sender as CommandSender)?.SenderId);
+            Player TargetPlayer = Player.Get(Arguments.At(1));
 
             if (CannotBeVotekicked(TargetPlayer))
             {
@@ -65,12 +65,7 @@ namespace Commands.VotekickCommand
                 return false;
             }
 
-            string reason = "";
-
-            for (int i = 2; i < arguments.Count; i++)
-            {
-                reason += arguments.At(i) + " ";
-            }
+            string reason = ExtractReason(Arguments);
 
             Votekick.Votekick.Instance.ActiveKickPoll = new Votekick.KickPoll(reason, TargetPlayer);
 
@@ -78,15 +73,15 @@ namespace Commands.VotekickCommand
             return true;
         }
 
-        public bool Vote(ArraySegment<string> arguments, ICommandSender sender, out string response)
+        public bool Vote(ArraySegment<string> Arguments, ICommandSender sender, out string response)
         {
-            var playerSender = sender as Player;
+            var playerSender = Player.Get((sender as CommandSender)?.SenderId);
 
             if (ActiveVotekick is null) { response = "There is no currently active votekick!"; return false; }
             if (ActiveVotekick.AlreadyVoted.Contains(playerSender)) { response = "You've already voted on this votekick!"; return false; }
-            if (not(CanVote(sender as CommandSender))) { response = "You're not allowed to use this command!"; return false; }
+            if (!CanVote(sender as CommandSender)) { response = "You're not allowed to use this command!"; return false; }
 
-            switch (arguments.At(0))
+            switch (Arguments.At(0))
             {
                 case "yes":
                 case "y":
@@ -109,12 +104,16 @@ namespace Commands.VotekickCommand
 
         public bool CanStart(CommandSender player)
         {
-            return not(player.CheckPermission("vk.banned")) || player.CheckPermission("vk.master"); //Mainly so players with the *.* permission can run the command
+            bool Banned = player.CheckPermission("vk.banned");
+
+            return (!Banned) || player.CheckPermission("vk.master"); //Mainly so players with the *.* permission can run the command
         }
 
         public bool CanVote(CommandSender player)
         {
-            return not(player.CheckPermission("vk.votebanned") || player.CheckPermission("vk.banned")) || player.CheckPermission("vk.master");
+            bool Banned = (player.CheckPermission("vk.votebanned") || player.CheckPermission("vk.banned"));
+
+            return (!Banned) || player.CheckPermission("vk.master");
         }
 
         public bool CannotBeVotekicked(Player player)
@@ -122,6 +121,21 @@ namespace Commands.VotekickCommand
             return player?.CheckPermission("vk.immune") ?? true;
         }
 
-        public bool not(bool boolean) => !boolean;
+        private string ExtractReason(ArraySegment<string> Arguments)
+        {
+            if (Arguments.Count >= 3)
+            {
+                string output = "";
+
+                for (int i = 2; i < Arguments.Count; i++)
+                {
+                    output += Arguments.At(i) + " ";
+                }
+
+                return output;
+            }
+
+            return "No reason given";
+        }
     }
 }
