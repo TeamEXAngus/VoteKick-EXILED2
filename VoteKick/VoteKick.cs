@@ -14,7 +14,7 @@ namespace Votekick
         public override PluginPriority Priority { get; } = PluginPriority.Medium;
 
         public override Version RequiredExiledVersion { get; } = new Version(2, 10, 0);
-        public override Version Version { get; } = new Version(1, 0, 3);
+        public override Version Version { get; } = new Version(1, 0, 4);
 
         public KickPoll ActiveKickPoll = null;
 
@@ -51,7 +51,7 @@ namespace Votekick
             Votes = new int[2] { 0, 0 };
             AlreadyVoted = new List<Player>();
 
-            BroadcastToAllPlayers(BroadcastTime, $"Votekick: {Target.Nickname} for {Reason}\nType \".votekick yes\" or \".votekick no\" in the console to vote!");
+            BroadcastToAllPlayers(BroadcastTime, Votekick.Instance.Config.VotekickStartedBroadcast.Replace("{name}", Target.Nickname).Replace("{reason}", Reason));
             EndKickPoll(KickPollDuration);
         }
 
@@ -62,12 +62,12 @@ namespace Votekick
                 switch (Votes[0] > Votes[1])
                 {
                     case true:
-                        Target.Kick($"Votekick: {Reason}");
-                        BroadcastToAllPlayers(BroadcastTime, $"{Target.Nickname} was votekicked for {Reason}!");
+                        Target.Kick(Votekick.Instance.Config.VotekickKickMessage.Replace("{reason}", Reason));
+                        BroadcastToAllPlayers(BroadcastTime, Votekick.Instance.Config.VotekickSuccessBroadcast.Replace("{name}", Target.Nickname).Replace("{reason}", Reason));
                         break;
 
                     case false:
-                        BroadcastToAllPlayers(BroadcastTime, $"{Target.Nickname} was not votekicked!");
+                        BroadcastToAllPlayers(BroadcastTime, Votekick.Instance.Config.VotekickFailBroadcast.Replace("{name}", Target.Nickname));
                         break;
                 }
 

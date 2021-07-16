@@ -13,5 +13,10 @@ namespace Votekick
 
         [Description("The number of seconds which polls should last for.")]
         public int VotekickDuration { get; set; } = 30;
+
+        public string VotekickStartedBroadcast { get; set; } = "Votekick: {name} for {reason}\nType \".votekick yes\" or \".votekick no\" in the console to vote!";
+        public string VotekickSuccessBroadcast { get; set; } = "{name} was votekicked for {reason}!";
+        public string VotekickFailBroadcast { get; set; } = "{name} was not votekicked!";
+        public string VotekickKickMessage { get; set; } = "Votekick: {reason}";
     }
 }
